@@ -1,0 +1,12 @@
+REST APIs is a stateless API that can request at any state. 
+HTTP Methods is use to base on what we want to do, Create, Read, Update and Delete.
+Challenges I faced were understanding the dataflow and use of postman, but i overcame
+it by doing the practical.
+
+Why use POST for creating resources and PUT for updating?
+Post is use for creating because it is program to create new identity like ID
+while PUT usses existing ID to update.
+
+What status code should be returned when attempting to update a non-existent resource?
+404
+"    .json({ message: `No food found with id ${foodId}.` });"
