@@ -1,0 +1,3 @@
+Separating database queries from route handlers in .js files significantly improves readability and maintainability 
+ When database logic is embedded directly within route handlers alongside validation and response logic, the code becomes dense and difficult to read.
+ Conversely, encapsulating the database operations into dedicated functions allows the route handlers to remain clean and focused solely on HTTP request management.
