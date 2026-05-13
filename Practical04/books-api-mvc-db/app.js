@@ -5,6 +5,10 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const bookController = require("./controllers/bookController");
+const {
+  validateBook,
+  validateBookId,
+} = require("./middlewares/middleValidation"); // import Book Validation Middleware
 
 // Create Express app
 const app = express();
@@ -17,8 +21,15 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bo
 // Routes for books
 // Link specific URL paths to the corresponding controller functions
 app.get("/books", bookController.getAllBooks);
-app.get("/books/:id", bookController.getBookById);
-app.post("/books", bookController.createBook);
+app.get("/books/:id", validateBookId, bookController.getBookById);
+app.post("/books", validateBook, bookController.createBook);
+app.put(
+  "/books/:id",
+  validateBookId,
+  validateBook,
+  bookController.updateBook
+);
+app.delete("/books/:id", validateBookId, bookController.deleteBook);
 
 // Start server
 app.listen(port, () => {

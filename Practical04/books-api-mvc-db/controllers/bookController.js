@@ -38,8 +38,40 @@ async function createBook(req, res) {
   }
 }
 
+// Update existing book
+async function updateBook(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    const updated = await bookModel.updateBook(id, req.body);
+    if (!updated) {
+      return res.status(404).json({ error: "Book not found" });
+    }
+    res.json(updated);
+  } catch (error) {
+    console.error("Controller error:", error);
+    res.status(500).json({ error: "Error updating book" });
+  }
+}
+
+// Delete a book
+async function deleteBook(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    const deleted = await bookModel.deleteBook(id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Book not found" });
+    }
+    res.status(204).send();
+  } catch (error) {
+    console.error("Controller error:", error);
+    res.status(500).json({ error: "Error deleting book" });
+  }
+}
+
 module.exports = {
   getAllBooks,
   getBookById,
   createBook,
+  updateBook,
+  deleteBook,
 };
