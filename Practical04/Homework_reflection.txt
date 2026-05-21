@@ -1,0 +1,46 @@
+Q1. 
+The code was reorganised from a single app.js file into three dedicated folders, each with a clear responsibility:
+
+controllers/bookController.js -- handles HTTP logic. Functions like getAllBooks, getBookById, createBook, updateBook, and deleteBook were written here.
+Each one reads from req (e.g. req.params.id, req.body) and sends back a res (like res.json() or res.status(404)). The controller never touches SQL directly — it just calls the model and responds.
+
+models/bookModel.js --handles all database logic. Every SQL query (SELECT, INSERT, UPDATE, DELETE) lives here.
+Functions like getAllBooks() open a connection, run a parameterised query using request.input() to prevent SQL injection, return the data, then close the connection in finally. The model knows nothing about HTTP — it just works with data.
+
+middlewares/middleValidation.js --handles input validation before the request even reaches the controller. validateBook uses a Joi schema to check that title and author are valid strings, and validateBookId checks that the URL parameter :id is a positive number.
+If validation fails, it returns a 400 immediately with clear error messages. If it passes, it calls next() to continue.
+
+app.js became the entry point only -- it sets up Express, registers middleware (express.json()), maps routes to their controller functions (e.g. app.get("/books/:id", validateBookId, bookController.getBookById)), starts the server, and handles graceful shutdown.
+
+Q2. 
+The biggest challenge was deciding whether logic belongs in the controller or the model, which is a common confusion when first learning MVC.
+A useful rule from  the code: if it touches req or res, it's controller logic. If it runs a SQL query or returns raw data, it's model logic.
+For example, parsing req.params.id with parseInt() happens in the controller, but the actual SELECT ... WHERE id = @id query lives in the model.
+
+
+Q3.
+With the MVC structure, adding a new feature follows a predictable three-step pattern every time:
+
+Model — write the SQL query (e.g. searchBooksByAuthor(author))
+Controller — write a function that calls the model and sends the response
+app.js — add one route line linking the URL to the controller
+
+Without MVC, adding any feature meant reading through one large app.js to find where to insert code, risking breaking unrelated logic. Now each layer is independent.
+
+Q4.
+ app.js is now only 30 lines and instantly readable
+ and can see every route, what middleware runs, and what controller handles it. bookModel.js can be read top to bottom as pure database logic without any HTTP noise.
+
+Q5.
+
+Easier debugging , when something breaks, the layer tells you where to look. 
+A wrong SQL result? Check bookModel.js. 
+A wrong HTTP status code? Check bookController.js. 
+A bad request getting through? Check middleValidation.js. Never have to read the whole codebase.
+
+Safer queries , because all SQL is in the model using request.input() for parameterised queries, 
+there is one place to audit for SQL injection. If it were spread across app.js, might miss one.
+
+Reusability, validateBook in your middleware is registered on both POST /books and PUT /books/:id with one line each. 
+If I had written that validation inline in two separate route handlers, I'd have to update it in two places whenever the rules change. 
+The model functions like getBookById() are similarly reused — createBook and updateBook both call it internally to return the updated record.
