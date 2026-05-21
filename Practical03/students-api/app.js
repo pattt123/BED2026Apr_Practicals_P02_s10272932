@@ -33,12 +33,12 @@ process.on("SIGINT", async () => {
 
 // --- GET Routes  ---
 
-// GET all books
-app.get("/books", async (req, res) => {
+// GET all students
+app.get("/students", async (req, res) => {
   let connection; // Declare connection outside try for finally block
   try {
     connection = await sql.connect(dbConfig); // Get the database connection
-    const sqlQuery = `SELECT student_id FROM Students`; // Select specific columns
+    const sqlQuery = `SELECT student_id, name, address FROM Students`; // Select specific columns
     const request = connection.request();
     const result = await request.query(sqlQuery);
     res.json(result.recordset); // Send the result as JSON
@@ -66,7 +66,7 @@ app.get("/students/:id", async (req, res) => {
   let connection;
   try {
     connection = await sql.connect(dbConfig); // Get the database connection
-    const sqlQuery = `SELECT student_id, student_name FROM Students WHERE student_id = @id`;
+    const sqlQuery = `SELECT student_id, name, address FROM Students WHERE student_id = @id`;
     const request = connection.request();
     request.input("id", studentId); // Bind the id parameter
     const result = await request.query(sqlQuery);
@@ -77,7 +77,7 @@ app.get("/students/:id", async (req, res) => {
     res.json(result.recordset[0]); // Send the student data as JSON
   } catch (error) {
     console.error(`Error in GET /students/${studentId}:`, error);
-    res.status(500).send("Error retrieving student"); // Send a 500 error on failure
+    res.status(500).send("Error retrieving student");
   } finally {
     if (connection) {
       try {
@@ -91,7 +91,7 @@ app.get("/students/:id", async (req, res) => {
 
 // --- POST Route  ---
 
-// POST create new student
+// POST create new students
 app.post("/students", async (req, res) => {
   const newStudentData = req.body; // Get new student data from request body
 
@@ -100,10 +100,11 @@ app.post("/students", async (req, res) => {
   let connection;
   try {
     connection = await sql.connect(dbConfig); // Get the database connection
-    const sqlQuery = `INSERT INTO Students (student_name) VALUES (@student_name); SELECT SCOPE_IDENTITY() AS student_id;`;
+    const sqlQuery = `INSERT INTO Students (name, address) VALUES (@name, @address); SELECT SCOPE_IDENTITY() AS student_id;`;
     const request = connection.request();
     // Bind parameters from the request body
-    request.input("student_name", newStudentData.student_name);
+    request.input("name", newStudentData.name);
+    request.input("address", newStudentData.address);
     const result = await request.query(sqlQuery);
 
     // Attempt to fetch the newly created student to return it
@@ -111,7 +112,7 @@ app.post("/students", async (req, res) => {
 
     // Directly fetch the new student here instead of calling a function
     // Re-using the same connection before closing it in finally
-    const getNewStudentQuery = `SELECT student_id, student_name FROM Students WHERE student_id = @id`;
+    const getNewStudentQuery = `SELECT student_id, name, address FROM Students WHERE student_id = @id`;
     const getNewStudentRequest = connection.request();
     getNewStudentRequest.input("id", newStudentId);
     const newStudentResult = await getNewStudentRequest.query(getNewStudentQuery);
@@ -149,11 +150,12 @@ app.put("/students/:id", async (req, res) => {
   let connection;
   try {
     connection = await sql.connect(dbConfig); // Get the database connection
-    const sqlQuery = `UPDATE Students SET student_name = @student_name WHERE student_id = @student_id`;
+    const sqlQuery = `UPDATE Students SET name = @name, address = @address WHERE student_id = @id`;
     const request = connection.request();
     // Bind parameters from the request body and URL parameter
-    request.input("student_id", studentId);
-    request.input("student_name", updatedStudentData.student_name);
+    request.input("id", studentId);
+    request.input("name", updatedStudentData.name);
+    request.input("address", updatedStudentData.address);
     const result = await request.query(sqlQuery);
 
     // Check if the student was found and updated
@@ -162,9 +164,9 @@ app.put("/students/:id", async (req, res) => {
     }
 
     // Fetch the updated student data to return it
-    const getUpdatedStudentQuery = `SELECT student_id, student_name FROM Students WHERE student_id = @student_id`;
+    const getUpdatedStudentQuery = `SELECT student_id, name, address FROM Students WHERE student_id = @id`;
     const getUpdatedStudentRequest = connection.request();
-    getUpdatedStudentRequest.input("student_id", studentId);
+    getUpdatedStudentRequest.input("id", studentId);
     const updatedStudentResult = await getUpdatedStudentRequest.query(getUpdatedStudentQuery);
 
     res.status(200).json(updatedStudentResult.recordset[0]); // Send 200 OK status and the updated student data
@@ -194,10 +196,10 @@ app.delete("/students/:id", async (req, res) => {
   let connection;
   try {
     connection = await sql.connect(dbConfig); // Get the database connection
-    const sqlQuery = `DELETE FROM Students WHERE student_id = @student_id`;
+    const sqlQuery = `DELETE FROM Students WHERE student_id = @id`;
     const request = connection.request();
-    // Bind the student_id parameter
-    request.input("student_id", studentId);
+    // Bind the id parameter
+    request.input("id", studentId);
     const result = await request.query(sqlQuery);
 
     // Check if the student was found and deleted
