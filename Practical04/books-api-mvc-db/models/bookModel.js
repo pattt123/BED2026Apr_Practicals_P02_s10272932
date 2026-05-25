@@ -57,8 +57,7 @@ async function createBook(bookData) {
   let connection;
   try {
     connection = await sql.connect(dbConfig);
-    const query =
-      "INSERT INTO Books (title, author) VALUES (@title, @author); SELECT SCOPE_IDENTITY() AS id;";
+    const query ="INSERT INTO Books (title, author) VALUES (@title, @author); SELECT SCOPE_IDENTITY() AS id;";
     const request = connection.request();
     request.input("title", bookData.title);
     request.input("author", bookData.author);

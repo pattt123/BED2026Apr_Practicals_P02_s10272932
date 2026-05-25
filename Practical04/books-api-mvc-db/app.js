@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 // Load environment variables
 dotenv.config();
 
+const userController = require("./controllers/userController"); // Note: Changed to userController for consistency
 const bookController = require("./controllers/bookController");
 const {
   validateBook,
@@ -39,6 +40,16 @@ app.put(
   bookController.updateBook
 );
 app.delete("/books/:id", validateBookId, bookController.deleteBook);
+
+
+app.post("/users", userController.createUser); // Create user
+app.get("/users", userController.getAllUsers); // Get all users
+app.get("/users/search", userController.searchUsers);
+app.get("/users/with-books", userController.getUsersWithBooks)
+app.get("/users/:id", userController.getUserById); // Get user by ID
+app.put("/users/:id", userController.updateUser); // Update user
+app.delete("/users/:id", userController.deleteUser); // Delete user
+
 
 // Start server
 app.listen(port, () => {
