@@ -1,6 +1,7 @@
 const express = require("express");
 const sql = require("mssql");
 const dotenv = require("dotenv");
+const path = require("path");
 // Load environment variables
 dotenv.config();
 
@@ -13,6 +14,19 @@ const {
 // Create Express app
 const app = express();
 const port = process.env.PORT || 3000;
+
+
+// ... other requires and app setup ...
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Ensure extended is true for urlencoded
+
+// --- Serve static files from the 'public' directory ---
+// When a request comes in for a static file (like /index.html, /styles.css, /script.js),
+// Express will look for it in the 'public' folder relative to the project root.
+app.use(express.static(path.join(__dirname, "public")));
+
+// ... your API routes (e.g.,
 
 // Middleware
 app.use(express.json()); // Parse JSON request bodies

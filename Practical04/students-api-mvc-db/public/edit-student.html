@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>Edit Student</title>
+	</head>
+	<body>
+		<h1>Edit Student</h1>
+		<form id="editForm">
+			<input type="hidden" name="id" />
+			<div>
+				<label>Name: <input type="text" name="name" required /></label>
+			</div>
+			<div>
+				<label>Address: <input type="text" name="address" required /></label>
+			</div>
+			<div>
+				<button type="submit">Save</button>
+				<a href="/students.html">Cancel</a>
+			</div>
+		</form>
+
+		<script src="edit-student.js"></script>
+	</body>
+</html>
