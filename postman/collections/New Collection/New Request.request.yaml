@@ -1,4 +1,10 @@
 $kind: http-request
-url: ""
+name: New Request
+url: http://localhost:3000/users/search?searchTerm=user3
 method: GET
+queryParams:
+  searchTerm: user3
+body:
+  type: json
+  content: '{"name":"Louis", "address": "Football feild"}'
 order: 1777257274568
