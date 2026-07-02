@@ -1,9 +1,12 @@
+const path = require("path");
+
 const express = require("express");
 const sql = require("mssql");
 const dotenv = require("dotenv");
 // Load environment variables
 dotenv.config();
 
+const userController = require("./controllers/userController"); // Note: Changed to userController for consistency
 const bookController = require("./controllers/bookController");
 const {
   validateBook,
@@ -14,10 +17,17 @@ const {
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware
-app.use(express.json()); // Parse JSON request bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
+// ... other requires and app setup ...
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Ensure extended is true for urlencoded
+
+// --- Serve static files from the 'public' directory ---
+// When a request comes in for a static file (like /index.html, /styles.css, /script.js),
+// Express will look for it in the 'public' folder relative to the project root.
+app.use(express.static(path.join(__dirname, "public")));
+
+// ... your API routes (e.g.,
 // Routes for books
 // Link specific URL paths to the corresponding controller functions
 app.get("/books", bookController.getAllBooks);
@@ -30,6 +40,16 @@ app.put(
   bookController.updateBook
 );
 app.delete("/books/:id", validateBookId, bookController.deleteBook);
+
+
+app.post("/users", userController.createUser); // Create user
+app.get("/users", userController.getAllUsers); // Get all users
+app.get("/users/search", userController.searchUsers);
+app.get("/users/with-books", userController.getUsersWithBooks)
+app.get("/users/:id", userController.getUserById); // Get user by ID
+app.put("/users/:id", userController.updateUser); // Update user
+app.delete("/users/:id", userController.deleteUser); // Delete user
+
 
 // Start server
 app.listen(port, () => {
